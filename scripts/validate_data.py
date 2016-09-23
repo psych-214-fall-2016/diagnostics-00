@@ -23,10 +23,13 @@ def file_hash(filename):
         SHA1 hexadecimal hash string for contents of `filename`.
     """
     # Open the file, read contents as bytes.
+    fobj = open(filename, 'rb')
+    contents = fobj.read()
+    fobj.close()
+
     # Calculate, return SHA1 has on the bytes from the file.
-    raise RuntimeError('No code yet')
-
-
+    return hashlib.sha1(contents).hexdigest()
+   
 def validate_data(data_directory):
     """ Read ``data_hashes.txt`` file in `data_directory`, check hashes
 
@@ -46,12 +49,25 @@ def validate_data(data_directory):
         ``data_hashes.txt`` file.
     """
     # Read lines from ``data_hashes.txt`` file.
-    # Split into SHA1 hash and filename
-    # Calculate actual hash for given filename.
-    # If hash for filename is not the same as the one in the file, raise
-    # ValueError
-    raise RuntimeError("No code yet")
+    fobj = open('./data/data_hashes.txt', 'rt')
+    lines = fobj.readlines()
+    fobj.close()
 
+    # Split into SHA1 hash and filename
+    split_lines = [line.split() for line in lines]
+
+    # Calculate actual hash for given filename.
+    for line in split_lines: 
+        fhash = file_hash('./data/'+line[1])
+
+        # If hash for filename is not the same as the one in the file, raise
+        # ValueError
+        if fhash != line[0]:
+            raise ValueError('Hash mismatch in file: data/'+line[1])
+
+    print('Files validated.')
+
+    
 
 def main():
     # This function (main) called when this file run as a script.
