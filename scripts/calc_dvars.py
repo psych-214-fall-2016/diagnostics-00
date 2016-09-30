@@ -50,13 +50,18 @@ def calc_image_dvars(img):
         1D array with root mean square difference values between each volume
         and the following volume
     """
+    data = img.get_data()
     # For each voxel, calculate the differences between each volume and the one
     # following;
-    #
+    diff = data[:,:,:,1:]-data[:,:,:,:-1]
     # Square the differences;
+    diff_sq = diff**2
     # Sum over voxels for each volume, and divide by the number of voxels;
+    dvars_sq = diff_sq.mean(axis=(0,1,2))
     # Return the square root of these values.
-    raise RuntimeError('No code yet')
+    dvars = dvars_sq**0.5
+    #raise RuntimeError('No code yet')
+    return dvars
 
 
 def main():
