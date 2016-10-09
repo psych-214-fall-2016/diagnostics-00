@@ -99,7 +99,7 @@ def get_outlier_coords(com, window, filename, fig):
     values = dvars_sliding.calc_sliding_dvars(None, window, temp)
 
     q1, q3 = np.percentile(values, [25, 75])
-    p = 1.5 #large values make outlier threshold higher
+    p = 3 #large values make outlier threshold higher
     x = (q3-q1)*p
     outlier_high = values> q3 + x
     outlier_low = values< q1 - x
@@ -114,7 +114,7 @@ def get_outlier_coords(com, window, filename, fig):
         return outlier_vols
 
     else:
-        return None
+        return []
 
 def main():
 
