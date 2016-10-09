@@ -20,7 +20,20 @@ import dvars_sliding
 
 
 def calc_image_COM(img):
+    """
+    returns center of mass xyz coordinates for each volume in 4d data of img
 
+    Parameters
+    ----------
+    img : image object
+        nibabel image object containing 4D file, with last dimension length
+        ``t``.
+
+    Returns
+    -------
+    com : list of 3-tuples with com coordinate (x,y,z), length number of volumes
+
+    """
     data = img.get_data() #get 4d array from img
 
     com = [] #init array for COM
@@ -50,19 +63,9 @@ def plot_COM(com,filename):
     plt.suptitle('center of mass: '+filename)
     plt.show()
 
-def get_outlier_coords(values,p=1.5):
 
-    q1, q3 = np.percentile(values, [25, 75])
-    x = (q3-q1)*p
-    outlier_high = values> q3 + x
-    outlier_low = values< q1 - x
-    outlier_idx = np.logical_or(outlier_high, outlier_low)
-    outlier_coords = [[i,values[i]] for i in range(len(outlier_idx)) if outlier_idx[i]]
-
-    return np.array(outlier_coords).T
 
 def plot_com_dvars(com_dvars, coords, window, filename):
-
 
     plt.suptitle('dvars for center of mass coords; window = '+str(window)+'; '+str(filename))
     plt.plot(com_dvars)
@@ -70,10 +73,48 @@ def plot_com_dvars(com_dvars, coords, window, filename):
     plt.xlim([0, len(com_dvars)])
     plt.show()
 
-def print_results(filename, coords, window):
-    print(filename+' outlier volumes: ')
-    for i in range(coords.shape[1]):
-        print('   '+str(int(coords[0,i])+window))
+
+
+def get_outlier_coords(com, window, filename, fig):
+    """
+    get outlier volumes from com list
+
+    Parameters
+    ----------
+    com : list of 3-tuples with com coordinate (x,y,z), length number of volumes
+
+    window: int, window size for sliding dvars
+
+    filename: str, .nii filename for plot title
+
+    fig: 1 or 0, 1=show plot & 0 = no plot
+
+    Returns
+    -------
+    outlier_vols : list outlier volume numbers (or None)
+
+    """
+    temp = np.array([[i[0] for i in com], [i[1] for i in com],[i[2] for i in com]])
+    temp = np.reshape(temp,(3,1,1,temp.shape[1]))
+    values = dvars_sliding.calc_sliding_dvars(None, window, temp)
+
+    q1, q3 = np.percentile(values, [25, 75])
+    p = 1.5 #large values make outlier threshold higher
+    x = (q3-q1)*p
+    outlier_high = values> q3 + x
+    outlier_low = values< q1 - x
+    outlier_idx = np.logical_or(outlier_high, outlier_low)
+    if outlier_idx.sum() >0:
+        outlier_coords = [[i,values[i]] for i in range(len(outlier_idx)) if outlier_idx[i]]
+        outlier_coords = np.array(outlier_coords).T
+
+        if fig:
+            plot_com_dvars(values, outlier_coords, window, filename)
+        outlier_vols = [int(outlier_coords[0,i])+window for i in range(outlier_coords.shape[1])]
+        return outlier_vols
+
+    else:
+        return None
 
 def main():
 
@@ -89,15 +130,14 @@ def main():
     #plot_COM(data_com,filename)
 
     #calc dvars over com coords
-    window = 1; #using small sliding window
-    temp = np.array([[i[0] for i in data_com], [i[1] for i in data_com],[i[2] for i in data_com]])
-    temp = np.reshape(temp,(3,1,1,temp.shape[1]))
-    data_com_dvars = dvars_sliding.calc_sliding_dvars(None, window, temp)
-    coords = get_outlier_coords(data_com_dvars)
-    #plot_com_dvars(data_com_dvars, coords, window, filename)
+    window = 1 #size of sliding window for dvars
+    fig = 0 #1= display plot, 0= no plot
+    outliers = get_outlier_coords(data_com, window, filename, fig)
 
     #print results
-    print_results(filename, coords, window)
+    print(filename+' outlier volumes: ')
+    print(outliers)
+
 
 if __name__ == '__main__':
     main()
