@@ -11,6 +11,7 @@ sys.path.append("scripts/")
 import calc_centerofmass as com
 import outliers_mean_brain as mb
 import nibabel as nib
+import numpy as np
 
 def find_outliers(data_directory):
     """ Print filenames and outlier indices for images in `data_directory`.
@@ -44,9 +45,9 @@ def find_outliers(data_directory):
             if i in outliers_com or i+1 in outliers_com or i-1 in outliers_com:
                 outliers.append(i)
 
-        print(filename+' outlier volumes: ')
-        print(outliers)
-
+        #print(filename+' outlier volumes: ')
+        #print(outliers)
+        print(filename, ', '.join([str(i) for i in outliers]))
 
 
 def main():
