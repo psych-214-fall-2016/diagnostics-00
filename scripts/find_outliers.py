@@ -8,7 +8,8 @@ import os
 import sys
 sys.path.append("scripts/")
 
-import scripts.calc_centerofmass as com
+import calc_centerofmass as com
+import outliers_mean_brain as mb
 import nibabel as nib
 
 def find_outliers(data_directory):
@@ -26,15 +27,26 @@ def find_outliers(data_directory):
     None
     """
     data_names = [f for f in os.listdir(data_directory) if f[-4:]==".nii"]
-    
+
 
     for filename in data_names:
+        # Use center of mass method
         img = nib.load(data_directory+'/'+filename, mmap=False)
         data_com = com.calc_image_COM(img)
-        outliers = com.get_outlier_coords(data_com, 1, filename, 0) #don't make plots
+        outliers_com = com.get_outlier_coords(data_com, 1, filename, 0) #don't make plots
+
+        # Use mean method
+        outliers_mean = mb.mean_brain(data_directory+'/'+filename, 'z')
+
+        # Get outliers picked up by both methods
+        outliers = []
+        for i in outliers_mean:
+            if i in outliers_com or i+1 in outliers_com or i-1 in outliers_com:
+                outliers.append(i)
+
         print(filename+' outlier volumes: ')
         print(outliers)
-    
+
 
 
 def main():
