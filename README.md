@@ -17,7 +17,12 @@ the root mean square difference (RMS) is calculated for the sliding window
 average over the volumes along the time axis. The default window size is 1.
 Volumes for which RMS is 3 times outside IQR are considered outliers.
 
-2. **CHRISTINE**
+2. Projection on mean brain: A brain "template" is found for each slice in the
+volume by taking the mean brain volume over time and thresholding each slice in
+the mean brain volume (to find a common area). Each slice is then projected onto
+the template for that slice. For each slice, outlier time points/volumes are
+those that have projection values below 1.5 * IQR. Outlier volumes are then
+defined as those with more than 1/4 of its slices marked as outliers.
 
 Volumes are labeled as outliers if they (or +/- 1 neighbor) are identified
 with both methods. Overall, scans with more than 2 outlier volumes are
