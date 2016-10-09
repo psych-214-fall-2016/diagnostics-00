@@ -8,6 +8,21 @@ You should put this `packages` directory on your Python PATH.
 
 This file has instructions on how to get, validate and process the data.
 
+## Outlier detection methods
+
+Two different outlier detection methods are applied to each scan:
+
+1. Center of mass: Using the center of mass (x,y,z) coordinates for each volume,
+the root mean square difference (RMS) is calculated for the sliding window
+average over the volumes along the time axis. The default window size is 1.
+Volumes for which RMS is 3 times outside IQR are considered outliers.
+
+2. **CHRISTINE**
+
+Volumes are labeled as outliers if they (or +/- 1 neighbor) are identified
+with both methods. Overall, scans with more than 2 outlier volumes are
+considered to be problem scans.
+
 ## Get the data
 
     cd data
