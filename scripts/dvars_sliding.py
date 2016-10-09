@@ -15,7 +15,7 @@ import seaborn as sns
 
 sns.set()
 
-def calc_sliding_dvars(img, win):
+def calc_sliding_dvars(img, win, data = None):
     """
     Root mean squared difference between volumes in `img` over a sliding
     window.
@@ -29,6 +29,9 @@ def calc_sliding_dvars(img, win):
     win : int
         Size of sliding window.
 
+    data = None : will extract data from img.get_data() if data==None; otherwise
+        can use func with numpy array (without img file)
+
     Output
     ------
     dvars : shape (t-1,) array
@@ -36,7 +39,9 @@ def calc_sliding_dvars(img, win):
         and the average over the previous (win) and future (win) volumes. The
         first (win) and last (win) volumes are lost.
     """
-    data = img.get_data()
+    if data is None:
+        data = img.get_data()
+
     # For each voxel, calculate the differences between each volume and the
     # average of the win volumes around it
     diff = []
