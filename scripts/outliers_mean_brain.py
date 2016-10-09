@@ -6,8 +6,26 @@ from skimage import filters
 
 def mean_img(data, ax):
     """
-    Return mean thresholded (Otsu) volume
-    Also return threshold value
+    Return mean brain volume over time. Each slice is thresholded (Otsu) to
+    remove noise. The thresholds for each slice are also returned (currently
+    unused).
+
+    Input
+    -----
+    data : 4D numpy array
+        Data from scan.
+
+    ax : int | 0 | 1 | 2
+        Axis along which the slices are defined. Values 0, 1, 2 correspond to
+        the x, y, and z axes respectively.
+
+    Output
+    ------
+    mean_img : 3D numpy array
+        Thresholded mean brain volume over time.
+
+    thresh : numpy array (1, # slices)
+        Threshold for each slice.
     """
     # Average volume over time
     mean_img = data.mean(axis=3)
@@ -29,8 +47,26 @@ def mean_img(data, ax):
 
 def projection_on_mean(data, mean_brain, ax):
     """
-    Return projection of each slice to slice mean.
-    Values returned in (# volume, # slice) array
+    Return projection of each slice (in each volume) to the mean slice (from the
+    thresholded mean brain volume).
+
+    Input
+    -----
+    data : 4D numpy array
+        Data from scan.
+
+    mean_brain : 3D numpy array
+        Thresholded mean brain volume over time.
+
+    ax : int | 0 | 1 | 2
+        Axis along which the slices are defined. Values 0, 1, 2 correspond to
+        the x, y, and z axes respectively.
+
+    Output
+    ------
+    projections : numpy array (# volumes, # slices)
+        Projection/dot product of each slice in each volume on the corresponding
+        slice in the mean_brain.
     """
 
     # Reshape data and mean
@@ -50,7 +86,19 @@ def projection_on_mean(data, mean_brain, ax):
 
 def find_outlier_volumes(projections):
     """
-    Find volumes that had outlier slices using IQR
+    Count the number of outlier slices (using 1.5 * IQR) in each volume.
+
+    Input
+    -----
+    projections : numpy array (# volumes, # slices)
+        Projection/dot product of each slice in each volume on the corresponding
+        slice in the mean_brain.
+
+    Output
+    ------
+    outliers : numpy array (# volumes, # slices)
+        Binary array. Entry (i, j) = 1 if slice j in volume i is an outlier,
+        and (i, j) = 0 otherwise.
     """
     outliers = np.zeros(projections.shape)
 
@@ -58,14 +106,22 @@ def find_outlier_volumes(projections):
         proj = projections[:, s]
         q75, q25 = np.percentile(proj, [75, 25])
         iqr = q75 - q25
-        outliers[:, s] = (proj < (q25 - 1.75 * iqr)).astype(int)
+        outliers[:, s] = (proj < (q25 - 1.5 * iqr)).astype(int)
 
     return outliers
 
 def mean_brain(filename, ax):
     """
-    Filename : file containing scan data
-    dir      : direction of slicing, 'x', 'y', 'z'
+    Find the outlier brain volumes in the scan.
+
+    Input
+    -----
+    filename : string
+        Filename where data is contained, probably .nii file.
+
+    ax : string | 'x' | 'y' | 'z'
+        Direction over which to slice. For example, if ax is 'x', then each
+        slice is a slice in the y-z plane.
     """
     # Load scan
     img = nib.load(filename)
