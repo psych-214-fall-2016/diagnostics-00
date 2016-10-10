@@ -39,7 +39,7 @@ paying attention to the task.
 Independently of these outlier computations, we have two observations from
 visually inspecting these scans (scripts/vis_4d_movie.py):
 
--- The top and bottom (sagittal plane) portions of the brain are cut off in
+-- The top and bottom portions of the brain are cut off in
 some scans. This is most striking for sub02 and sub03, and noticeable in
 varying degrees for other participants. These scans do not necessarily need to
 be excluded, but possible inferences both within and between participants
