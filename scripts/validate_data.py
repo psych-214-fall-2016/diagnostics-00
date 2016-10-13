@@ -29,7 +29,7 @@ def file_hash(filename):
 
     # Calculate, return SHA1 has on the bytes from the file.
     return hashlib.sha1(contents).hexdigest()
-   
+
 def validate_data(data_directory):
     """ Read ``data_hashes.txt`` file in `data_directory`, check hashes
 
@@ -49,7 +49,7 @@ def validate_data(data_directory):
         ``data_hashes.txt`` file.
     """
     # Read lines from ``data_hashes.txt`` file.
-    fobj = open('./data/data_hashes.txt', 'rt')
+    fobj = open(data_directory+'/data_hashes.txt', 'rt')
     lines = fobj.readlines()
     fobj.close()
 
@@ -57,8 +57,8 @@ def validate_data(data_directory):
     split_lines = [line.split() for line in lines]
 
     # Calculate actual hash for given filename.
-    for line in split_lines: 
-        fhash = file_hash('./data/'+line[1])
+    for line in split_lines:
+        fhash = file_hash(data_directory+'/'+line[1])
 
         # If hash for filename is not the same as the one in the file, raise
         # ValueError
@@ -67,7 +67,7 @@ def validate_data(data_directory):
 
     print('Files validated.')
 
-    
+
 
 def main():
     # This function (main) called when this file run as a script.
